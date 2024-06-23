@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -38,5 +39,26 @@ class AuthController extends Controller
             'message' => 'Sukses register',
             'data' => $success
         ]);
+    }
+    
+    public function login(Request $request)
+    {
+        $login = Auth::Attempt($request->all());
+        if ($login) {
+            $user = Auth::user();
+            $user->remember_token = Str::random(100);
+            $user->save();
+
+            return response()->json([
+                'response_code' => 200,
+                'message' => 'Login Berhasil',
+                'conntent' => $user
+            ]);
+        }else{
+            return response()->json([
+                'response_code' => 404,
+                'message' => 'Username atau Password Tidak Ditemukan!'
+            ]);
+        }
     }
 }
