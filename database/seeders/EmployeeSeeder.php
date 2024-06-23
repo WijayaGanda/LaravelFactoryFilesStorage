@@ -16,6 +16,7 @@ class EmployeeSeeder extends Seeder
      */
     public function run():void
     {
+        Employee::factory()->count(200)->create();
         // DB::table('employees')->insert([
         //     [
         //         'firstname' => 'Purnama',
@@ -39,7 +40,6 @@ class EmployeeSeeder extends Seeder
         //         'position_id' => 3
         //     ],
         // ]);
-        Employee::factory()->count(10)->create();
 
     }
 }

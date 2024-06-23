@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EmployeesExport;
+use PDF;
 use App\Models\Employee;
 use App\Models\Position;
+use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
+use Barryvdh\DomPDF\PDF as DomPDFPDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\support\Str;
 use Illuminate\Support\Facades\Storage;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class EmployeeController extends Controller
 {
@@ -21,12 +27,11 @@ class EmployeeController extends Controller
     {
         $pageTitle = 'Employee List';
 
-        // ELOQUENT
-        $employees = Employee::all();
-
+        confirmDelete();
+        $positions = Position::all();
         return view('employee.index', [
             'pageTitle' => $pageTitle,
-            'employees' => $employees
+            'positions' => $positions
         ]);
     }
 
@@ -93,6 +98,7 @@ class EmployeeController extends Controller
         }
 
         $employee->save();
+        Alert::success('Added Successfully', 'Employee Data Added Successfully');
 
         return redirect()->route('employees.index');
     }
@@ -111,6 +117,7 @@ class EmployeeController extends Controller
         $employee = Employee::find($id);
 
         return view('employee.show', compact('pageTitle', 'employee'));
+        return response()->json(['employee'=>$employee], 100);
     }
 
     /**
@@ -166,20 +173,21 @@ class EmployeeController extends Controller
 
         //handle cv
         if ($request->hasFile('cv')) {
-        $file = $request->file('cv');
-        $originalFilename = $file->getClientOriginalName();
-        $encryptedFilename = $file->hashName();
-        $file->store('public/files');
+            $file = $request->file('cv');
+            $originalFilename = $file->getClientOriginalName();
+            $encryptedFilename = $file->hashName();
+            $file->store('public/files');
 
-        // menghapus cv lama jika tersedia
-        if ($employee->encrypted_filename) {
-            Storage::delete('public/files/' . $employee->encrypted_filename);
+            // menghapus cv lama jika tersedia
+            if ($employee->encrypted_filename) {
+                Storage::delete('public/files/' . $employee->encrypted_filename);
+            }
+
+            $employee->original_filename = $originalFilename;
+            $employee->encrypted_filename = $encryptedFilename;
         }
-
-        $employee->original_filename = $originalFilename;
-        $employee->encrypted_filename = $encryptedFilename;
-    }
         $employee->save();
+        Alert::success('Changed Successfully', 'Employee Data Changed Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -200,6 +208,7 @@ class EmployeeController extends Controller
             Storage::delete('public/files/' . $employee->encrypted_filename);
         }
         $employee->delete();
+        Alert::success('Deleted Successfully', 'Employee Data Deleted');
         return redirect()->route('employees.index');
     }
 
@@ -212,5 +221,34 @@ class EmployeeController extends Controller
         if (Storage::exists($encryptedFilename)) {
             return Storage::download($encryptedFilename, $downloadFilename);
         }
+    }
+
+    public function getData(Request $request)
+    {
+        $employees = Employee::with('position');
+
+        if ($request->ajax()) {
+            return datatables()->of($employees)
+                ->addIndexColumn()
+                ->addColumn('actions', function ($employee) {
+                    return view('employee.action', compact('employee'));
+                })
+                ->toJson();
+        }
+    }
+    //excel
+    public function exportExcel()
+    {
+        return Excel::download(new EmployeesExport, 'employees.xlsx');
+    }
+
+    //dom pdf
+    public function exportPdf()
+    {
+        $employees = Employee::all();
+
+        $pdf = FacadePdf::loadView('employee.export_pdf', compact('employees'));
+
+        return $pdf->download('employees.pdf');
     }
 }
