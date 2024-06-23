@@ -17,8 +17,28 @@
 @if ($currentRouteName == 'employees.index') active @endif">Employee</a></li>
             </ul>
             <hr class="d-md-none text-white-50">
-            <a href="{{ route('profile') }}" class="btn btn-outline-light my-2 ms-md-auto"><i
-                    class="bi-person-circle me-1"></i> My Profile</a>
+            {{-- <a href="{{ route('profile') }}" class="btn btn-outline-light my-2 ms-md-auto"><i
+                    class="bi-person-circle me-1"></i> My Profile</a> --}}
+            
         </div>
+        <li class="nav-item dropdown" style="list-style-type: none;">
+            <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color: white"><i
+                class="bi-person-circle me-1"></i>
+                {{ Auth::user()->name }}
+            </a>
+            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <a href="{{ route('profile') }}" class="btn my-2 ms-md-auto"><i
+                    class="bi-person-circle me-1"></i> My Profile</a>
+                <a class="dropdown-item" href="{{ route('logout') }}"
+                   onclick="event.preventDefault();
+                                 document.getElementById('logout-form').submit();"><i class="bi bi-lock" ></i>
+                    {{ __('Logout') }}
+                </a>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </div>
+        </li>
     </div>
 </nav>

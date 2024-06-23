@@ -11,7 +11,7 @@ $(function() {
             { data: "email", name: "email" },
             { data: "age", name: "age" },
             { data: "position.name", name: "position.name" },
-            { data: "actions", name: "actions", orderable: false, searchable: false },
+            { data: "action", name: "action", orderable: false, searchable: false },
         ],
         order: [[0, "desc"]],
         lengthMenu: [

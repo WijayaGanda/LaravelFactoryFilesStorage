@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('home', [HomeController::class, 'index'])->name('home'); 
@@ -110,3 +110,7 @@ Route::get('getEmployees', [EmployeeController::class, 'getData'])->name('employ
 Route::get('exportExcel', [EmployeeController::class, 'exportExcel'])->name('employees.exportExcel');
 //dom
 Route::get('exportPdf', [EmployeeController::class, 'exportPdf'])->name('employees.exportPdf');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

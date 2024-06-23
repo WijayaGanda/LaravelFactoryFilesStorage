@@ -230,7 +230,7 @@ class EmployeeController extends Controller
         if ($request->ajax()) {
             return datatables()->of($employees)
                 ->addIndexColumn()
-                ->addColumn('actions', function ($employee) {
+                ->addColumn('action', function ($employee) {
                     return view('employee.action', compact('employee'));
                 })
                 ->toJson();
